@@ -5,6 +5,7 @@
 
 #include <utility>
 #include <vector>
+#include <deque>
 #include "esphome/core/automation.h"
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
@@ -632,6 +633,24 @@ class StreamingMovingAverageFilter : public StreamingFilter {
 
   float sum_{0.0f};
   size_t valid_count_{0};
+};
+
+/** Delay filter.
+ *
+ * This filter delays values for a specified time period before outputting them.
+ */
+class DelayFilter : public Filter, public Component {
+ public:
+  explicit DelayFilter(uint32_t time_period);
+
+  optional<float> new_value(float value) override;
+
+  float get_setup_priority() const override;
+
+ protected:
+  uint32_t time_period_;
+
+  std::deque<std::pair<uint32_t, float>> storage_;
 };
 
 }  // namespace esphome::sensor

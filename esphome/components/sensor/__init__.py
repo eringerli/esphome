@@ -285,6 +285,7 @@ SensorInRangeCondition = sensor_ns.class_("SensorInRangeCondition", Filter)
 ClampFilter = sensor_ns.class_("ClampFilter", Filter)
 RoundFilter = sensor_ns.class_("RoundFilter", Filter)
 RoundMultipleFilter = sensor_ns.class_("RoundMultipleFilter", Filter)
+DelayFilter = sensor_ns.class_("DelayFilter", Filter, cg.Component)
 
 validate_unit_of_measurement = cv.string_strict
 validate_accuracy_decimals = cv.int_
@@ -1106,6 +1107,13 @@ async def calibrate_ntc_temperature_filter_to_code(config, filter_id):
         calib[CONF_B],
         calib[CONF_C],
     )
+
+
+@FILTER_REGISTRY.register("delay", DelayFilter, cv.positive_time_period_milliseconds)
+async def delay_filter_to_code(config, filter_id):
+    var = cg.new_Pvariable(filter_id, config)
+    await cg.register_component(var, {})
+    return var
 
 
 def _mean(xs):

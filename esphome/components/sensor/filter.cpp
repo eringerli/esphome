@@ -569,6 +569,29 @@ void StreamingMovingAverageFilter::reset_batch() {
   this->valid_count_ = 0;
 }
 
+// DelayFilter
+optional<float> DelayFilter::new_value(float value) {
+  const uint32_t now = App.get_loop_component_start_time();
+
+  storage_.push_back({now, value});
+
+  ESP_LOGE(TAG, "DelayFilter(%p): size: %zu", this, storage_.size());
+
+  optional<float> temp;
+
+  if (!storage_.empty()) {
+    while ((storage_.front().first + time_period_) < now) {
+      temp = storage_.front().second;
+      storage_.pop_front();
+    }
+  }
+
+  return temp;
+}
+
+DelayFilter::DelayFilter(uint32_t time_period) : time_period_(time_period) {}
+float DelayFilter::get_setup_priority() const { return setup_priority::HARDWARE; }
+
 }  // namespace esphome::sensor
 
 #endif  // USE_SENSOR_FILTER
